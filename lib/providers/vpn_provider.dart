@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../models/server_config.dart';
 import '../services/storage_service.dart';
-import '../services/ping_service.dart';
+import '../services/vpn_service.dart';
 
 enum VpnStatus { disconnected, connecting, connected }
 
@@ -11,15 +11,13 @@ class VpnProvider extends ChangeNotifier {
   List<ServerConfig> _servers = [];
   ServerConfig? _selected;
   VpnStatus _status = VpnStatus.disconnected;
-  int? _ping;
-  bool _pinging = false;
+  String? _error;
 
   List<ServerConfig> get servers => _servers;
   ServerConfig? get selected => _selected;
   VpnStatus get status => _status;
   bool get isConnected => _status == VpnStatus.connected;
-  int? get ping => _ping;
-  bool get pinging => _pinging;
+  String? get error => _error;
 
   Future<void> init() async {
     _servers = await _storage.loadServers();
@@ -60,32 +58,27 @@ class VpnProvider extends ChangeNotifier {
 
   Future<void> toggleConnection() async {
     if (_selected == null) return;
+    _error = null;
 
     if (_status == VpnStatus.connected) {
       _status = VpnStatus.disconnected;
-      _ping = null;
       notifyListeners();
+      try {
+        await VpnNativeService.stop();
+      } catch (_) {}
       return;
     }
 
     _status = VpnStatus.connecting;
-    _ping = null;
     notifyListeners();
 
-    await Future.delayed(const Duration(seconds: 2));
-    _status = VpnStatus.connected;
-    notifyListeners();
-
-    // Измеряем пинг после подключения
-    await checkPing();
-  }
-
-  Future<void> checkPing() async {
-    if (_selected == null) return;
-    _pinging = true;
-    notifyListeners();
-    _ping = await PingService.ping(_selected!);
-    _pinging = false;
+    try {
+      await VpnNativeService.start(_selected!);
+      _status = VpnStatus.connected;
+    } catch (e) {
+      _error = e.toString();
+      _status = VpnStatus.disconnected;
+    }
     notifyListeners();
   }
 }

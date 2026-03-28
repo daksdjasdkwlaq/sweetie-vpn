@@ -9,6 +9,15 @@ workflows:
         script: flutter pub get
       - name: Generate icons
         script: dart run flutter_launcher_icons
+      - name: Download sing-box
+        script: |
+          mkdir -p android/app/src/main/assets
+          curl -L "https://github.com/SagerNet/sing-box/releases/download/v1.9.0/sing-box-1.9.0-android-arm64.tar.gz" -o /tmp/sb-arm64.tar.gz
+          tar -xzf /tmp/sb-arm64.tar.gz -C /tmp/
+          cp /tmp/sing-box-1.9.0-android-arm64/sing-box android/app/src/main/assets/sing-box-arm64
+          curl -L "https://github.com/SagerNet/sing-box/releases/download/v1.9.0/sing-box-1.9.0-android-arm.tar.gz" -o /tmp/sb-arm.tar.gz
+          tar -xzf /tmp/sb-arm.tar.gz -C /tmp/
+          cp /tmp/sing-box-1.9.0-android-arm/sing-box android/app/src/main/assets/sing-box-arm
       - name: Build APK
         script: flutter build apk --release
     artifacts:
