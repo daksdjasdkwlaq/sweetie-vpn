@@ -21,8 +21,6 @@ class HomeScreen extends StatelessWidget {
                 _buildConnectButton(context, vpn),
                 const SizedBox(height: 24),
                 _buildStatusText(vpn),
-                const SizedBox(height: 16),
-                _buildPingWidget(vpn),
                 const Spacer(),
                 _buildServerCard(context, vpn),
                 const SizedBox(height: 32),
@@ -85,10 +83,10 @@ class HomeScreen extends StatelessWidget {
         height: 180,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(color: ringColor.withOpacity(0.3), width: 16),
+          border: Border.all(color: ringColor.withAlpha(76), width: 16),
           boxShadow: [
             BoxShadow(
-              color: ringColor.withOpacity(0.4),
+              color: ringColor.withAlpha(102),
               blurRadius: 40,
               spreadRadius: 8,
             ),
@@ -106,8 +104,8 @@ class HomeScreen extends StatelessWidget {
                     strokeWidth: 3,
                   ),
                 )
-              : Icon(
-                  isConnected ? Icons.power_settings_new : Icons.power_settings_new,
+              : const Icon(
+                  Icons.power_settings_new,
                   color: Colors.white,
                   size: 64,
                 ),
@@ -138,54 +136,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPingWidget(VpnProvider vpn) {
-    if (vpn.status != VpnStatus.connected) return const SizedBox.shrink();
-
-    return GestureDetector(
-      onTap: () => vpn.checkPing(),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        decoration: BoxDecoration(
-          color: const Color(0xFF1A1A2E),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white12),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.network_ping, color: Colors.white38, size: 16),
-            const SizedBox(width: 8),
-            vpn.pinging
-                ? const SizedBox(
-                    width: 14,
-                    height: 14,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white38,
-                    ),
-                  )
-                : Text(
-                    vpn.ping == null ? 'Нет ответа' : '${vpn.ping} мс',
-                    style: TextStyle(
-                      color: _pingColor(vpn.ping),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-            const SizedBox(width: 6),
-            const Icon(Icons.refresh, color: Colors.white24, size: 14),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Color _pingColor(int? ping) {
-    if (ping == null) return Colors.redAccent;
-    if (ping < 100) return const Color(0xFF00E676);
-    if (ping < 300) return const Color(0xFFFFB300);
-    return Colors.redAccent;
-  }
+  Widget _buildServerCard(BuildContext context, VpnProvider vpn) {
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
@@ -205,7 +156,7 @@ class HomeScreen extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: const Color(0xFF7C4DFF).withOpacity(0.2),
+                color: const Color(0xFF7C4DFF).withAlpha(51),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(Icons.language, color: Color(0xFF7C4DFF)),
