@@ -12,25 +12,18 @@ workflows:
       - name: Download sing-box
         script: |
           mkdir -p android/app/src/main/assets
-          SBVER="1.12.22"
-          curl -L "https://github.com/SagerNet/sing-box/releases/download/v${SBVER}/sing-box-${SBVER}-android-arm64-v8a.tar.gz" -o /tmp/sb.tar.gz
-          ls -la /tmp/sb.tar.gz
-          file /tmp/sb.tar.gz
-          tar -xzf /tmp/sb.tar.gz -C /tmp/ || true
-          find /tmp -name "sing-box" -type f 2>/dev/null
+          SBVER="1.12.3"
+          URL="https://github.com/SagerNet/sing-box/releases/download/v${SBVER}/sing-box-${SBVER}-android-arm64-v8a.tar.gz"
+          echo "Downloading from: $URL"
+          wget --no-check-certificate -O /tmp/sb.tar.gz "$URL"
+          echo "File size: $(wc -c < /tmp/sb.tar.gz)"
+          echo "File type: $(file /tmp/sb.tar.gz)"
+          tar -xzf /tmp/sb.tar.gz -C /tmp/
           BINARY=$(find /tmp -name "sing-box" -type f 2>/dev/null | head -1)
-          if [ -n "$BINARY" ]; then
-            cp "$BINARY" android/app/src/main/assets/sing-box-arm64
-            cp "$BINARY" android/app/src/main/assets/sing-box-arm
-            echo "sing-box binary copied successfully"
-          else
-            echo "Binary not found, trying alternative URL"
-            curl -L "https://github.com/SagerNet/sing-box/releases/download/v${SBVER}/sing-box-${SBVER}-linux-arm64.tar.gz" -o /tmp/sb2.tar.gz
-            tar -xzf /tmp/sb2.tar.gz -C /tmp/ || true
-            BINARY2=$(find /tmp -name "sing-box" -type f 2>/dev/null | head -1)
-            cp "$BINARY2" android/app/src/main/assets/sing-box-arm64
-            cp "$BINARY2" android/app/src/main/assets/sing-box-arm
-          fi
+          echo "Found binary: $BINARY"
+          cp "$BINARY" android/app/src/main/assets/sing-box-arm64
+          cp "$BINARY" android/app/src/main/assets/sing-box-arm
+          echo "Done: $(ls -la android/app/src/main/assets/)"
       - name: Build APK
         script: flutter build apk --release
     artifacts:
