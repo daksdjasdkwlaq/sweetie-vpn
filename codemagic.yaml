@@ -12,12 +12,25 @@ workflows:
       - name: Download sing-box
         script: |
           mkdir -p android/app/src/main/assets
-          curl -L "https://github.com/SagerNet/sing-box/releases/download/v1.9.0/sing-box-1.9.0-android-arm64.tar.gz" -o /tmp/sb-arm64.tar.gz
-          tar -xzf /tmp/sb-arm64.tar.gz -C /tmp/
-          cp /tmp/sing-box-1.9.0-android-arm64/sing-box android/app/src/main/assets/sing-box-arm64
-          curl -L "https://github.com/SagerNet/sing-box/releases/download/v1.9.0/sing-box-1.9.0-android-arm.tar.gz" -o /tmp/sb-arm.tar.gz
-          tar -xzf /tmp/sb-arm.tar.gz -C /tmp/
-          cp /tmp/sing-box-1.9.0-android-arm/sing-box android/app/src/main/assets/sing-box-arm
+          SBVER="1.12.22"
+          curl -L "https://github.com/SagerNet/sing-box/releases/download/v${SBVER}/sing-box-${SBVER}-android-arm64-v8a.tar.gz" -o /tmp/sb.tar.gz
+          ls -la /tmp/sb.tar.gz
+          file /tmp/sb.tar.gz
+          tar -xzf /tmp/sb.tar.gz -C /tmp/ || true
+          find /tmp -name "sing-box" -type f 2>/dev/null
+          BINARY=$(find /tmp -name "sing-box" -type f 2>/dev/null | head -1)
+          if [ -n "$BINARY" ]; then
+            cp "$BINARY" android/app/src/main/assets/sing-box-arm64
+            cp "$BINARY" android/app/src/main/assets/sing-box-arm
+            echo "sing-box binary copied successfully"
+          else
+            echo "Binary not found, trying alternative URL"
+            curl -L "https://github.com/SagerNet/sing-box/releases/download/v${SBVER}/sing-box-${SBVER}-linux-arm64.tar.gz" -o /tmp/sb2.tar.gz
+            tar -xzf /tmp/sb2.tar.gz -C /tmp/ || true
+            BINARY2=$(find /tmp -name "sing-box" -type f 2>/dev/null | head -1)
+            cp "$BINARY2" android/app/src/main/assets/sing-box-arm64
+            cp "$BINARY2" android/app/src/main/assets/sing-box-arm
+          fi
       - name: Build APK
         script: flutter build apk --release
     artifacts:
